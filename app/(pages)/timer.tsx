@@ -1,23 +1,18 @@
-import { Image, StyleSheet, Platform } from "react-native";
+import { StyleSheet } from "react-native";
 
-import { HelloWave } from "@/components/HelloWave";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { PomodoroTimer } from "@/components/PomodoroTimer";
-import { ListPomodoroTimers } from "@/components/ListPomodoroTimers";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { red } from "react-native-reanimated/lib/typescript/reanimated2/Colors";
+import { useLocalSearchParams } from "expo-router";
 
-export default function HomeScreen() {
+export default function TimerScreen() {
+  const params = useLocalSearchParams();
+  const { workTime, breakTime } = params;
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Pomodoro timers</ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.content}>
-        <ListPomodoroTimers />
-      </ThemedView>
+      <PomodoroTimer workTime={Number(workTime)} breakTime={Number(breakTime)}></PomodoroTimer>
     </SafeAreaView>
   );
 }

@@ -9,8 +9,8 @@ export type PomodoroTimerProps = ViewProps & {
     breakTime?: number;
 };
   
-export function PomodoroTimer ({ style, lightColor, darkColor, ...otherProps }: PomodoroTimerProps) {
-  const [time, setTime] = useState(5); // 20 minutes timer (in seconds)
+export function PomodoroTimer ({ style, lightColor, darkColor, workTime, breakTime, ...otherProps }: PomodoroTimerProps) {
+  const [time, setTime] = useState(workTime!); // 20 minutes timer (in seconds)
   const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
 
   useEffect(() => {

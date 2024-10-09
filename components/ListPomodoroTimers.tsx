@@ -22,7 +22,7 @@ export function ListPomodoroTimers ({ lightColor, darkColor }: ListPomodoroTimer
       <FlatList
         data={timersList}
         renderItem={({item}) =>
-          <Link href={{pathname: '/(pages)/timer', params: {breakTime: item.breakTime, workTime: item.workTime} }}>
+          <Link style={styles.item} href={{pathname: '/(pages)/timer', params: {breakTime: item.breakTime, workTime: item.workTime} }}>
             <ThemedText style={styles.item}>{item.workTime/60}:{item.breakTime/60}</ThemedText>
           </Link>
         }

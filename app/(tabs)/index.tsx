@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     paddingTop: 16,
-    paddingStart: 4,
+    paddingStart: 8,
   },
   stepContainer: {
     gap: 8,

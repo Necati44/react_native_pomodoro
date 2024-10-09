@@ -1,30 +1,53 @@
-import React, { useState, useEffect } from 'react';
-import { View, ViewProps, Text, StyleSheet } from 'react-native';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import React, { useState, useEffect } from "react";
+import { View, ViewProps, Text, StyleSheet } from "react-native";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 export type PomodoroTimerProps = ViewProps & {
-    lightColor?: string;
-    darkColor?: string;
-    workTime?: number;
-    breakTime?: number;
+  lightColor?: string;
+  darkColor?: string;
+  workTime?: number;
+  breakTime?: number;
+  isPause: boolean;
+  isStop: boolean;
 };
-  
-export function PomodoroTimer ({ style, lightColor, darkColor, workTime, breakTime, ...otherProps }: PomodoroTimerProps) {
-  const [time, setTime] = useState(workTime!); // 20 minutes timer (in seconds)
-  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+
+export function PomodoroTimer({
+  style,
+  lightColor,
+  darkColor,
+  workTime,
+  breakTime,
+  isPause,
+  isStop,
+  ...otherProps
+}: PomodoroTimerProps) {
+  const [time, setTime] = useState(workTime!);
+  const backgroundColor = useThemeColor(
+    { light: lightColor, dark: darkColor },
+    "background"
+  );
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTime(prevTime => (prevTime > 0 ? prevTime - 1 : 0));
+      if (!isPause) {
+        setTime((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
+      }
     }, 1000);
 
-    return () => clearInterval(interval); // Clear interval when component unmounts
-  }, []);
+    if (isStop) {
+      clearInterval(interval);
+      setTime(workTime!);
+    }
 
-  const formatTime = (seconds:number) => {
+    return () => clearInterval(interval);
+  }, [isPause, isStop]);
+
+  const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${minutes.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   return (
@@ -34,22 +57,22 @@ export function PomodoroTimer ({ style, lightColor, darkColor, workTime, breakTi
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   circle: {
-    width: 300,  // Width and height are equal to form a circle
+    width: 300, // Width and height are equal to form a circle
     height: 300,
     borderRadius: 150, // Half of the width/height to make it a circle
-    backgroundColor: '#fdf3e9', // Light beige color
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000', // Optional shadow for a 3D effect
+    backgroundColor: "#fdf3e9", // Light beige color
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000", // Optional shadow for a 3D effect
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
@@ -57,7 +80,7 @@ const styles = StyleSheet.create({
   },
   timerText: {
     fontSize: 48,
-    fontWeight: 'bold',
-    color: '#333', // Dark text color for contrast
+    fontWeight: "bold",
+    color: "#333", // Dark text color for contrast
   },
 });

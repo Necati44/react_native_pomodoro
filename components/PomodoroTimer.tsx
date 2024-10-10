@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { View, ViewProps, Text, StyleSheet } from "react-native";
+import { View, ViewProps, Text, StyleSheet, Button } from "react-native";
 import { useThemeColor } from "@/hooks/useThemeColor";
+
+import _BackgroundTimer from "react-native-background-timer"
+
+import * as Notifications from 'expo-notifications';
 
 export type PomodoroTimerProps = ViewProps & {
   lightColor?: string;
@@ -9,38 +13,100 @@ export type PomodoroTimerProps = ViewProps & {
   breakTime?: number;
   isPause: boolean;
   isStop: boolean;
+  setIsWorkingParent: React.Dispatch<React.SetStateAction<boolean>>;
 };
+
+// First, set the handler that will cause the notification
+// to show the alert
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 export function PomodoroTimer({
   style,
   lightColor,
   darkColor,
-  workTime,
-  breakTime,
+  workTime = 1500, // Par défaut, 25 minutes
+  breakTime = 300, // Par défaut, 5 minutes
   isPause,
   isStop,
+  setIsWorkingParent,
   ...otherProps
 }: PomodoroTimerProps) {
-  const [time, setTime] = useState(workTime!);
-  const backgroundColor = useThemeColor(
+  const [time, setTime] = useState(workTime);
+  const [isWorking, setIsWorking] = useState(true); // Pour suivre si on est en phase de travail ou de pause
+
+  const workColor = useThemeColor(
     { light: lightColor, dark: darkColor },
-    "background"
+    "workColor"
   );
 
+  const breakColor = useThemeColor(
+    { light: lightColor, dark: darkColor },
+    "breakColor"
+  );
+
+  // Planification d'une notification lorsque le temps est écoulé
+  const scheduleNotification = async (message: string) => {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Pomodoro Timer",
+        body: message,
+      },
+      identifier: "pomodoro-timer", // Utilise le même identifiant pour remplacer la notification précédente
+      trigger: null, // Immediate notification
+    });
+  };
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (!isPause) {
-        setTime((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
+    const registerForPushNotificationsAsync = async () => {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== 'granted') {
+        const { status: newStatus } = await Notifications.requestPermissionsAsync();
+        if (newStatus !== 'granted') {
+          console.warn('Permission pour les notifications refusée');
+        }
+      }
+    };
+  
+    registerForPushNotificationsAsync();
+
+    const interval = _BackgroundTimer.setInterval(async () => {
+      if (!isPause && time > 0) {
+        setTime((prevTime) => prevTime - 1);
+      } else if (time === 0) {
+        // Quand le temps atteint zéro, on bascule entre travail et pause
+        if (isWorking) {
+          setTime(breakTime); // Passe à la pause
+          await Notifications.dismissNotificationAsync("pomodoro-timer");
+          await scheduleNotification("Work session over! Time for a break.");
+        } else {
+          setTime(workTime); // Passe au travail
+          await Notifications.dismissNotificationAsync("pomodoro-timer");
+          await scheduleNotification("Break over! Time to get back to work.");
+        }
+        setIsWorking(!isWorking); // Change l'état (travail/pause)
+        setIsWorkingParent(!isWorking);
       }
     }, 1000);
 
+    // Réinitialisation lors de l'arrêt
     if (isStop) {
-      clearInterval(interval);
-      setTime(workTime!);
+      _BackgroundTimer.clearInterval(interval);
+      setTime(workTime); // Reset au temps de travail initial
+      setIsWorking(true); // Recommence avec le temps de travail
+      setIsWorkingParent(true);
     }
 
-    return () => clearInterval(interval);
-  }, [isPause, isStop]);
+    return () => {
+      _BackgroundTimer.clearInterval(interval);
+    }
+  }, [isPause, isStop, time, isWorking, workTime, breakTime]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -51,9 +117,12 @@ export function PomodoroTimer({
   };
 
   return (
-    <View style={[{ backgroundColor }, styles.container]}>
+    <View style={[styles.container, { backgroundColor: isWorking ? workColor : breakColor }]}>
       <View style={styles.circle}>
         <Text style={styles.timerText}>{formatTime(time)}</Text>
+        <Text style={styles.phaseText}>
+          {isWorking ? "Work Time" : "Break Time"}
+        </Text>
       </View>
     </View>
   );
@@ -82,5 +151,10 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: "bold",
     color: "#333", // Dark text color for contrast
+  },
+  phaseText: {
+    fontSize: 24,
+    marginTop: 10,
+    color: "#666", // Lighter text color for the phase
   },
 });

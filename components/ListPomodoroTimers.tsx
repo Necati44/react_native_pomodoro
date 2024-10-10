@@ -13,9 +13,16 @@ export function ListPomodoroTimers ({ lightColor, darkColor }: ListPomodoroTimer
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'separator');
 
   const timersList = [
-    {workTime: 1200, breakTime: 300},
+    {workTime: 5, breakTime: 5},
     {workTime: 2700, breakTime: 900},
   ]
+
+  const formatTime = (seconds:number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs}`; // ou utiliser un autre format selon tes préférences
+  };
+  
 
   return (
     <View style={styles.container}>
@@ -23,7 +30,7 @@ export function ListPomodoroTimers ({ lightColor, darkColor }: ListPomodoroTimer
         data={timersList}
         renderItem={({item}) =>
           <Link style={styles.item} href={{pathname: '/(pages)/timer', params: {breakTime: item.breakTime, workTime: item.workTime} }}>
-            <ThemedText style={styles.item}>{item.workTime/60}:{item.breakTime/60}</ThemedText>
+            <ThemedText style={styles.item}>{formatTime(item.workTime)} | {formatTime(item.breakTime)}</ThemedText>
           </Link>
         }
         ItemSeparatorComponent={() => <View style={[styles.separator, { backgroundColor: color }]} />}

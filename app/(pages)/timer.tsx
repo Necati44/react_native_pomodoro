@@ -17,10 +17,13 @@ export default function TimerScreen() {
   const [pauseIcon, setPauseIcon] = useState(true);
   const [pauseTimer, setPauseTimer] = useState(false);
   const [stopTimer, setStopTimer] = useState(false);
+  const [isWorking, setIsWorking] = useState(true); // État pour suivre la phase (travail/pause)
 
   const color = useThemeColor({}, "color");
 
-  const backgroundColor = useThemeColor({}, "background");
+  const workColor = useThemeColor({}, "workColor");
+
+  const breakColor = useThemeColor({}, "breakColor");
 
   return (
     <>
@@ -29,10 +32,11 @@ export default function TimerScreen() {
         breakTime={Number(breakTime)}
         isPause={pauseTimer}
         isStop={stopTimer}
+        setIsWorkingParent={setIsWorking} // Passer la fonction pour changer l'état
       ></PomodoroTimer>
-      <SafeAreaView style={{ flex: 1, backgroundColor: backgroundColor }}>
+      <SafeAreaView style={[{ flex: 1, backgroundColor: isWorking ? workColor : breakColor }]}>
         <ThemedView
-          style={{ flexDirection: "row", justifyContent: "center", gap: 10 }}
+          style={{ flexDirection: "row", justifyContent: "center", gap: 10, backgroundColor: isWorking ? workColor : breakColor }}
         >
           <IconButton
             onPress={() => {

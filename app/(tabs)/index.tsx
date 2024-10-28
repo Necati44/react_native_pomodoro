@@ -9,6 +9,7 @@ import { ListPomodoroTimers } from "@/components/ListPomodoroTimers";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { red } from "react-native-reanimated/lib/typescript/reanimated2/Colors";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useUser } from "@/context/UserContext";
 
 export default function HomeScreen() {
   usePermissions();

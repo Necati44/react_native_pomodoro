@@ -13,7 +13,7 @@ export function ListPomodoroTimers ({ lightColor, darkColor }: ListPomodoroTimer
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'separator');
 
   const timersList = [
-    {workTime: 5, breakTime: 5},
+    {workTime: 1200, breakTime: 600},
     {workTime: 2700, breakTime: 900},
   ]
 

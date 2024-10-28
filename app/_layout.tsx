@@ -12,6 +12,7 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 import { LogBox } from 'react-native';
+import { UserProvider } from "@/context/UserContext";
 LogBox.ignoreLogs(['new NativeEventEmitter']);
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -35,11 +36,13 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(pages)/timer" options={{ title: "Timer" }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
+      <UserProvider>
+        <Stack>
+          <Stack.Screen name="(pages)/timer" options={{ title: "Timer" }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+      </UserProvider>
     </ThemeProvider>
   );
 }

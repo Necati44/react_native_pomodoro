@@ -3,6 +3,7 @@ import * as Application from 'expo-application';
 import { initializeApp } from 'firebase/app';
 import { initializeAuth, getReactNativePersistence, GoogleAuthProvider } from 'firebase/auth';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
+import { getFirestore } from 'firebase/firestore';
 
 // Initialize Firebase
 const firebaseConfig = {
@@ -14,14 +15,16 @@ const firebaseConfig = {
     messagingSenderId: '535627715101',
     appId: Application.applicationId,
     // measurementId: 'G-measurement-id',
-  };
+};
 
-  const app = initializeApp(firebaseConfig);
-  const auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(ReactNativeAsyncStorage)
-  });
+const app = initializeApp(firebaseConfig);
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+});
 
-  // Initialize Firebase Authentication and get a reference to the service
-  const provider = new GoogleAuthProvider();
+// Initialize Firebase Authentication and get a reference to the service
+const provider = new GoogleAuthProvider();
 
-  export { auth, provider };
+const db = getFirestore();
+
+export { auth, provider, db };

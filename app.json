@@ -16,7 +16,9 @@
       "supportsTablet": true,
       "infoPlist": {
         "UIBackgroundModes": ["fetch", "location"]
-      }
+      },
+      "bundleIdentifier": "com.anonymous.reactnativepomodoro",
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {

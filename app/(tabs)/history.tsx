@@ -1,41 +1,91 @@
-import { StyleSheet, SafeAreaView, Button } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, SafeAreaView, Button, ActivityIndicator, ScrollView } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { useState } from 'react';
-import { GoogleSignin, GoogleSigninButton, isErrorWithCode, isSuccessResponse, statusCodes, User } from '@react-native-google-signin/google-signin';
-import { signIn, signOut } from '@/hooks/useGoogleSignIn';
+import { GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { useColorScheme } from '@/hooks/useColorScheme.web';
-import { Colors } from '@/constants/Colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { useUser } from '@/context/UserContext';
+import { getSessions, Session } from '@/types/Session';
 
-export default function TabTwoScreen() {
-  const [user, setUser] = useState<{ userInfo: User | null } | null>(null); // Initialiser comme null
-
-  const signInWithGoogle = async () => {
-    signIn(setUser);
-  }
-
-  const signOutWithGoogle = async () => {
-    signOut(setUser);
-  }
-
+export default function HistoryScreen() {
+  const { user, signIn, signOut } = useUser();
   const color = useThemeColor({}, "tint");
+  
+  const [sessions, setSessions] = useState<Session[]>([]); 
+  const [loading, setLoading] = useState<boolean>(true);
 
+  useEffect(() => {
+    const fetchSessions = async () => {
+      setLoading(true);
+      if (user?.user) {
+        const sessionData = await getSessions();
+        // Sort by date desc
+        sessionData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setSessions(sessionData);
+      } else {
+        setSessions([]);
+      }
+      setLoading(false);
+    };
 
+    fetchSessions();
+  }, [user]);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const secs = seconds % 60;
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const formatDate = (date: Date) => {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Les mois sont indexés à partir de 0
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    
+    return `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ThemedView style={styles.titleContainer}>
-        { user?.userInfo != null ?
+        {user?.user ? (
           <>
             <ThemedText type="title2" style={styles.welcomeText}>
-            <TabBarIcon name="user-alt" size={20} color={color} style={[]} /> {user.userInfo?.user.name}</ThemedText>
-            <Button onPress={() => { signOutWithGoogle() }} title='Log out'></Button>
+              <TabBarIcon name="user-alt" size={20} color={color} style={[]} /> {user.user.name}
+            </ThemedText>
+            <Button onPress={signOut} title="Log out" />
           </>
-          :
-          <GoogleSigninButton onPress={() => { signInWithGoogle() }}></GoogleSigninButton>
-        }
+        ) : (
+          <GoogleSigninButton onPress={signIn} />
+        )}
+      </ThemedView>
+
+      <ThemedView style={styles.content}>
+        {loading ? (
+          <ActivityIndicator size="large" color={color} />
+        ) : user?.user ? (
+          <ScrollView>
+            {sessions.length > 0 ? (
+              sessions.map((session, index) => (
+                <ThemedView key={index} style={styles.sessionContainer}>
+                  <ThemedText style={styles.sessionText}>
+                    {`Date: ${formatDate(session.date)}\nSessions: ${session.sessionCount}\nWorked time: ${formatTime(session.workDuration)}`}
+                  </ThemedText>
+                  <ThemedView style={[styles.separator, { backgroundColor: color }]} />
+                </ThemedView>
+              ))
+            ) : (
+              <ThemedText>No sessions recorded yet.</ThemedText>
+            )}
+          </ScrollView>
+        ) : (
+          <ThemedText>Sessions are only available for logged-in users.</ThemedText>
+        )}
       </ThemedView>
     </SafeAreaView>
   );
@@ -56,10 +106,20 @@ const styles = StyleSheet.create({
     paddingStart: 8,
     paddingEnd: 8,
     paddingBottom: 8,
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   welcomeText: {
-    flexShrink: 1, // Allow the text to shrink if too long
-    marginRight: 8, // Small margin between text and button
+    flexShrink: 1,
+    marginRight: 8,
+  },
+  sessionContainer: {
+    marginBottom: 8, // Espace entre les sessions
+  },
+  sessionText: {
+    marginBottom: 8, // Ajoute un espace entre les sessions
+  },
+  separator: {
+    height: 1,
+    marginVertical: 8, // Espace vertical autour de la ligne
   },
 });

@@ -1,11 +1,13 @@
 import {
     GoogleSignin,
     isErrorWithCode,
-    isNoSavedCredentialFoundResponse,
     isSuccessResponse,
     statusCodes,
     User
 } from '@react-native-google-signin/google-signin';
+
+import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import { auth, provider } from '@/firebase/firebaseConfig'
 
 GoogleSignin.configure(
     {
@@ -21,8 +23,8 @@ export async function signIn(setUser: React.Dispatch<React.SetStateAction<{userI
         const response = await GoogleSignin.signIn();
         if (isSuccessResponse(response)) {
           setUser({ userInfo: response.data });
-        } else {
-          // sign in was cancelled by user
+          const credential = GoogleAuthProvider.credential(response.data?.idToken);
+          return await signInWithCredential(auth,credential);
         }
       } catch (error) {
         if (isErrorWithCode(error)) {

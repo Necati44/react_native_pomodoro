@@ -8,8 +8,11 @@ import { PomodoroTimer } from "@/components/PomodoroTimer";
 import { ListPomodoroTimers } from "@/components/ListPomodoroTimers";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { red } from "react-native-reanimated/lib/typescript/reanimated2/Colors";
+import { usePermissions } from "@/hooks/usePermissions";
 
 export default function HomeScreen() {
+  usePermissions();
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ThemedView style={styles.titleContainer}>

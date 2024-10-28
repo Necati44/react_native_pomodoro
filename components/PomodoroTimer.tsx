@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, ViewProps, Text, StyleSheet, Button } from "react-native";
+import { View, ViewProps, Text, StyleSheet } from "react-native";
 import { useThemeColor } from "@/hooks/useThemeColor";
 
 import _BackgroundTimer from "react-native-background-timer"
@@ -40,6 +40,7 @@ export function PomodoroTimer({
 }: PomodoroTimerProps) {
   const [time, setTime] = useState(workTime);
   const [isWorking, setIsWorking] = useState(true); // Pour suivre si on est en phase de travail ou de pause
+  const [notificationDisplayed, setNotificationDisplayed] = useState(false); // Ajout d'un état pour l'alerte
 
   const workColor = useThemeColor(
     { light: lightColor, dark: darkColor },
@@ -64,18 +65,6 @@ export function PomodoroTimer({
   };
 
   useEffect(() => {
-    const registerForPushNotificationsAsync = async () => {
-      const { status } = await Notifications.getPermissionsAsync();
-      if (status !== 'granted') {
-        const { status: newStatus } = await Notifications.requestPermissionsAsync();
-        if (newStatus !== 'granted') {
-          console.warn('Permission pour les notifications refusée');
-        }
-      }
-    };
-  
-    registerForPushNotificationsAsync();
-
     const interval = _BackgroundTimer.setInterval(async () => {
       if (!isPause && time > 0) {
         setTime((prevTime) => prevTime - 1);

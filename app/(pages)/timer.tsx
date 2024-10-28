@@ -1,6 +1,5 @@
-import { Button, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 
-import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { PomodoroTimer } from "@/components/PomodoroTimer";
 import { SafeAreaView } from "react-native-safe-area-context";

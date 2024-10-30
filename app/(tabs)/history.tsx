@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, SafeAreaView, Button, ActivityIndicator, ScrollView } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -7,6 +7,9 @@ import { TabBarIcon } from '@/components/navigation/TabBarIcon';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useUser } from '@/context/UserContext';
 import { getSessions, Session } from '@/types/Session';
+import { auth } from '@/firebase/firebaseConfig';
+import { useFocusEffect } from 'expo-router';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export default function HistoryScreen() {
   const { user, signIn, signOut } = useUser();
@@ -15,22 +18,34 @@ export default function HistoryScreen() {
   const [sessions, setSessions] = useState<Session[]>([]); 
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const fetchSessions = async () => {
-      setLoading(true);
-      if (user?.user) {
-        const sessionData = await getSessions();
-        // Sort by date desc
-        sessionData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setSessions(sessionData);
-      } else {
-        setSessions([]);
-      }
-      setLoading(false);
-    };
+  const fetchSessions = async () => {
+    setLoading(true);
+    if (auth.currentUser) {
+      const sessionData = await getSessions(auth.currentUser?.uid!);
+      sessionData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setSessions(sessionData);
+    } else {
+      setSessions([]);
+    }
+    setLoading(false);
+  };
 
-    fetchSessions();
-  }, [user]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchSessions();
+    }, [user])
+  );
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        fetchSessions(); // Trigger fetch when the user is logged in
+      } else {
+        setSessions([]); // Reset sessions if the user is not logged in
+      }
+    });
+    return unsubscribe; // Cleanup on unmount
+  }, []);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);

@@ -2,7 +2,7 @@ import uuid from 'react-native-uuid';
 
 import { db } from "@/firebase/firebaseConfig";
 
-import { collection, addDoc, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, Timestamp, query, where } from 'firebase/firestore';
 
 export type Session = {
     uuid: string;
@@ -12,7 +12,6 @@ export type Session = {
     userUUID: string | undefined;
 };
 
-// Ajouter une session dans Firestore
 export async function addSession(sessionData: Omit<Session, 'uuid'>): Promise<void> {
     try {
       const session: Session = {
@@ -30,17 +29,16 @@ export async function addSession(sessionData: Omit<Session, 'uuid'>): Promise<vo
     }
   }
   
-  // Récupérer toutes les sessions de Firestore
-  export async function getSessions(): Promise<Session[]> {
+  export async function getSessions(userUUID: string): Promise<Session[]> {
     try {
-      const querySnapshot = await getDocs(collection(db, 'sessions'));
+      const sessionsRef = collection(db, 'sessions');
+      const q = query(sessionsRef, where('userUUID', '==', userUUID));
+      const querySnapshot = await getDocs(q);
       const sessions: Session[] = querySnapshot.docs.map((doc) => {
         const data = doc.data();
-  
-        // Conversion de Timestamp en Date pour correspondre au type Session
         return {
           uuid: data.uuid,
-          date: data.date.toDate(), // Conversion Timestamp Firestore en Date
+          date: data.date.toDate(),
           sessionCount: data.sessionCount,
           workDuration: data.workDuration,
           userUUID: data.userUUID,

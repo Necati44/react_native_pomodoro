@@ -40,10 +40,11 @@ export function PomodoroTimer({
   const [isSessionActive, setIsSessionActive] = useState(false);
   const { user } = useUser();
   const [sessionSaved, setSessionSaved] = useState(false);
+  
 
   // Utiliser des références pour éviter le reset de ces valeurs
   const workDurationRef = useRef(0);
-  const sessionCountRef = useRef(0);
+  const sessionCountRef = useRef(1);
 
   const workColor = useThemeColor({}, "workColor");
   const breakColor = useThemeColor({}, "breakColor");

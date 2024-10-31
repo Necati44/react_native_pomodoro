@@ -15,6 +15,7 @@ export function ListPomodoroTimers ({ lightColor, darkColor }: ListPomodoroTimer
   const timersList = [
     {workTime: 1200, breakTime: 600},
     {workTime: 2700, breakTime: 900},
+    {workTime: 5, breakTime: 5},
   ]
 
   const formatTime = (seconds:number) => {

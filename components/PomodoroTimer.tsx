@@ -36,13 +36,11 @@ export function PomodoroTimer({
 }: PomodoroTimerProps) {
   const [time, setTime] = useState(workTime);
   const [isWorking, setIsWorking] = useState(true);
-  const [startDate, setStartDate] = useState<Date | null>(null); // Start date of the session
+  const [startDate, setStartDate] = useState<Date | null>(null);
   const [isSessionActive, setIsSessionActive] = useState(false);
   const { user } = useUser();
   const [sessionSaved, setSessionSaved] = useState(false);
   
-
-  // Utiliser des références pour éviter le reset de ces valeurs
   const workDurationRef = useRef(0);
   const sessionCountRef = useRef(1);
 

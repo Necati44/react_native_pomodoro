@@ -1,14 +1,6 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  ViewProps,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
-import { useThemeColor } from "@/hooks/useThemeColor";
+import React from "react";
+import { ViewProps, TouchableOpacity } from "react-native";
 import { ThemedText } from "./ThemedText";
-import { ThemedView } from "./ThemedView";
 
 export type IconButtonProps = ViewProps & {
   lightColor?: string;

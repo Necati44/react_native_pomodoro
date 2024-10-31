@@ -1,4 +1,3 @@
-// Import necessary modules and types from React and Firebase, and Google Sign-In utilities
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes, User } from '@react-native-google-signin/google-signin';
 import { GoogleAuthProvider, signInWithCredential, signOut as firebaseSignOut } from 'firebase/auth';
